@@ -1,0 +1,18 @@
+[package]
+name = "count_gitlab"
+version = "0.1.0"
+authors = ["zoe <zoe211@163.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+log = "*"
+pretty_env_logger = "*"
+anyhow = "*"
+toml = "*"
+serde = "*"
+serde_derive = "*"
+smol = "*"
+http-types = "*"
+async-h1 = "*"

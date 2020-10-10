@@ -1,16 +1,13 @@
-use anyhow::Result;
 use log::info;
 
 use crate::statistic::{CodeStatistics, Commits};
 
-pub async fn save(id: usize, code_statistics: CodeStatistics) -> Result<()> {
+pub async fn save(id: usize, code_statistics: CodeStatistics) -> std::io::Result<()> {
     let date = chrono::Local::now().format("%F");
     let file_name = format!("statistics_{}_{}.csv", id, date);
 
     info!("开始写入文件: {}", file_name);
-    smol::fs::write(file_name, generate(code_statistics)).await?;
-
-    Ok(())
+    smol::fs::write(file_name, generate(code_statistics)).await
 }
 
 fn generate(code_statistics: CodeStatistics) -> String {

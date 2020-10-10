@@ -1,11 +1,14 @@
 use std::collections::{BTreeMap, HashMap};
+use std::iter::FromIterator;
 
 use anyhow::Result;
 use http_types::{Method, Request, Response, Url};
 use log::{debug, error, info};
 use serde_derive::{Deserialize, Serialize};
-use smol::channel::{unbounded, Sender};
 use smol::net::TcpStream;
+use smol::stream::StreamExt;
+use smol::Task;
+use util::stream_vec::StreamVec;
 
 use crate::CONFIG;
 
@@ -23,45 +26,39 @@ pub async fn run(id: usize) -> Result<CodeStatistics> {
     );
     info!("总页数： {}", total);
 
-    let (s, r) = unbounded();
     let mut tasks = vec![];
     for page in 1..=total {
-        let s = s.clone();
-        tasks.push(smol::spawn(count(s, id, page)));
+        tasks.push(smol::spawn(count(id, page)));
     }
 
-    smol::spawn(async {
-        for task in tasks {
-            if let Err(e) = task.await {
-                error!("count失败: {}", e)
-            }
-        }
-        drop(s)
-    })
-    .detach();
-
+    let mut tasks: StreamVec<Task<Result<CodeStatistics>>> = StreamVec::from_iter(tasks);
     let mut statistics = CodeStatistics::new();
-    while let Ok(c) = r.recv().await {
-        for (date, day_commits) in c {
-            match statistics.get_mut(&date) {
-                Some(all_commits) => {
-                    for (email, commits) in day_commits {
-                        match all_commits.get_mut(&email) {
-                            Some(someone_commits) => {
-                                someone_commits.times += commits.times;
-                                someone_commits.additions += commits.additions;
-                                someone_commits.deletions += commits.deletions;
-                            }
-                            None => {
-                                all_commits.insert(email, commits);
+    while let Some(res) = tasks.next().await {
+        match res {
+            Ok(c) => {
+                for (date, day_commits) in c {
+                    match statistics.get_mut(&date) {
+                        Some(all_commits) => {
+                            for (email, commits) in day_commits {
+                                match all_commits.get_mut(&email) {
+                                    Some(someone_commits) => {
+                                        someone_commits.times += commits.times;
+                                        someone_commits.additions += commits.additions;
+                                        someone_commits.deletions += commits.deletions;
+                                    }
+                                    None => {
+                                        all_commits.insert(email, commits);
+                                    }
+                                }
                             }
                         }
-                    }
+                        None => {
+                            statistics.insert(date, day_commits);
+                        }
+                    };
                 }
-                None => {
-                    statistics.insert(date, day_commits);
-                }
-            };
+            }
+            Err(e) => error!("{}", e),
         }
     }
 
@@ -92,7 +89,7 @@ struct Stats {
     deletions: usize,
 }
 
-async fn count(s: Sender<CodeStatistics>, id: usize, page: u16) -> Result<()> {
+async fn count(id: usize, page: u16) -> Result<CodeStatistics> {
     let mut res = commits(id, page).await?;
     let records: Vec<Record> = res.body_json().await.map_err(|e| {
         error!("解析gitlab响应报错: {}", e);
@@ -139,8 +136,7 @@ async fn count(s: Sender<CodeStatistics>, id: usize, page: u16) -> Result<()> {
         }
     }
 
-    s.send(statistics).await?;
-    Ok(())
+    Ok(statistics)
 }
 
 #[derive(Serialize)]

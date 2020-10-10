@@ -1,10 +1,18 @@
+use std::path::Path;
+
 use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
-use std::path::Path;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Config {
+    pub store_type: StoreType,
     pub git: Git,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum StoreType {
+    File,
+    SQLite,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -27,6 +35,7 @@ async fn init_config(cfg_name: &str) -> Result<()> {
     }
 
     let cfg = Config {
+        store_type: StoreType::SQLite,
         git: Git {
             addr: "http://devgit.z-bank.com".to_string(),
             token: "".to_string(),

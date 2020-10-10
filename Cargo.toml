@@ -19,3 +19,6 @@ http-types = "*"
 async-h1 = "*"
 chrono = "*"
 once_cell = "*"
+#strum = "*"
+#strum_macros = "*"
+util = { git = "https://gitee.com/zzoe/util" }

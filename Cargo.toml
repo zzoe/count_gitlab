@@ -19,6 +19,9 @@ http-types = "*"
 async-h1 = "*"
 chrono = "*"
 once_cell = "*"
+rbatis = "*"
+rbatis-core = { version = "*", features = ["sqlite"] }
+rbatis-macro-driver = "*"
 #strum = "*"
 #strum_macros = "*"
 util = { git = "https://gitee.com/zzoe/util" }

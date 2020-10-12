@@ -5,7 +5,7 @@ use crate::statistic::CodeStatistics;
 use crate::CONFIG;
 
 mod file;
-mod sqlite;
+pub mod sqlite;
 
 pub async fn save(id: usize, code_statistics: CodeStatistics) -> Result<()> {
     match CONFIG.store_type {

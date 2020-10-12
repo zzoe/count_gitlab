@@ -10,6 +10,7 @@ use smol::stream::StreamExt;
 use smol::Task;
 use util::stream_vec::StreamVec;
 
+use crate::store::sqlite;
 use crate::CONFIG;
 
 pub async fn run(id: usize) -> Result<CodeStatistics> {
@@ -75,18 +76,27 @@ pub struct Commits {
     pub deletions: usize,
 }
 
-#[derive(Debug, Deserialize)]
-struct Record {
-    parent_ids: Vec<String>,
-    author_email: String,
-    created_at: String,
-    stats: Stats,
+#[derive(Clone, Debug, Deserialize)]
+pub struct Record {
+    pub id: String,
+    pub short_id: String,
+    pub author_name: String,
+    pub author_email: String,
+    pub authored_date: String,
+    pub committer_name: String,
+    pub committer_email: String,
+    pub committed_date: String,
+    pub created_at: String,
+    pub title: String,
+    pub message: String,
+    pub parent_ids: Vec<String>,
+    pub stats: Stats,
 }
 
-#[derive(Debug, Deserialize)]
-struct Stats {
-    additions: usize,
-    deletions: usize,
+#[derive(Clone, Debug, Deserialize)]
+pub struct Stats {
+    pub additions: usize,
+    pub deletions: usize,
 }
 
 async fn count(id: usize, page: u16) -> Result<CodeStatistics> {
@@ -97,7 +107,10 @@ async fn count(id: usize, page: u16) -> Result<CodeStatistics> {
     })?;
 
     let mut statistics = CodeStatistics::new();
+    let mut commits = Vec::new();
     for record in records {
+        commits.push(sqlite::Commits::from(record.clone()));
+
         if record.parent_ids.len() > 1 {
             continue;
         }
@@ -135,6 +148,8 @@ async fn count(id: usize, page: u16) -> Result<CodeStatistics> {
             },
         }
     }
+
+    sqlite::save(id, commits).await?;
 
     Ok(statistics)
 }

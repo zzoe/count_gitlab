@@ -4,8 +4,8 @@ use once_cell::sync::Lazy;
 use crate::config::Config;
 
 mod config;
-mod statistic;
-mod store;
+pub mod statistic;
+pub mod store;
 
 pub static CONFIG: Lazy<Config> =
     Lazy::new(|| smol::block_on(config::init()).expect("读取配置文件失败"));

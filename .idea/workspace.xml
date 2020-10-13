@@ -16,7 +16,14 @@
         <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
       </path>
     </expand>
-    <select />
+    <select>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="BRANCH:origin/master" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </select>
   </component>
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated />
@@ -31,9 +38,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d8ec18af-4963-464c-9975-a96bcb403e08" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/store/db.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/statistic.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/statistic.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/store/sqlite.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/store/sqlite.rs" afterDir="false" />
     </list>
@@ -46,6 +52,11 @@
     <option name="formatViaClangd" value="false" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MacroExpansionManager">
@@ -84,6 +95,11 @@
     </option>
   </component>
   <component name="RunManager" selected="Cargo.Test store::sqlite::test::test_save">
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Test store::sqlite::test::test_save" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
       <option name="command" value="test --package count_gitlab --bin count_gitlab store::sqlite::test::test_save -- --exact" />
@@ -130,11 +146,6 @@
       <envs />
       <method v="2">
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <recent_temporary>
@@ -230,14 +241,14 @@
     <option name="LAST_COMMIT_MESSAGE" value="sqlite未完" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="334" y="361" key="#SQL_Dialects" timestamp="1602583035845">
+    <state x="334" y="361" key="#SQL_Dialects" timestamp="1602599333884">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="334" y="361" key="#SQL_Dialects/0.0.1920.1040@0.0.1920.1040" timestamp="1602583035845" />
-    <state x="552" y="178" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1602580914766">
+    <state x="334" y="361" key="#SQL_Dialects/0.0.1920.1040@0.0.1920.1040" timestamp="1602599333884" />
+    <state x="552" y="178" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1602598607287">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="178" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602580914766" />
+    <state x="552" y="178" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602598607287" />
     <state x="765" y="236" key="#com.intellij.ide.util.MemberChooser" timestamp="1602551223380">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -246,27 +257,27 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="184" y="86" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602327425806" />
-    <state x="880" y="424" key="FileChooserDialogImpl" timestamp="1602580852420">
+    <state x="880" y="424" key="FileChooserDialogImpl" timestamp="1602598590467">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="526" y="193" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1601650761507" />
-    <state x="880" y="424" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1602580852420" />
-    <state width="1877" height="282" key="GridCell.Tab.0.bottom" timestamp="1602588182488">
+    <state x="880" y="424" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1602598590467" />
+    <state width="1877" height="282" key="GridCell.Tab.0.bottom" timestamp="1602600727091">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1602588182488" />
-    <state width="1877" height="282" key="GridCell.Tab.0.center" timestamp="1602588182488">
+    <state width="1877" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1602600727091" />
+    <state width="1877" height="282" key="GridCell.Tab.0.center" timestamp="1602600727091">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1602588182488" />
-    <state width="1877" height="282" key="GridCell.Tab.0.left" timestamp="1602588182488">
+    <state width="1877" height="282" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1602600727091" />
+    <state width="1877" height="282" key="GridCell.Tab.0.left" timestamp="1602600727091">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1602588182488" />
-    <state width="1877" height="282" key="GridCell.Tab.0.right" timestamp="1602588182488">
+    <state width="1877" height="282" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1602600727091" />
+    <state width="1877" height="282" key="GridCell.Tab.0.right" timestamp="1602600727091">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1602588182488" />
+    <state width="1877" height="282" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1602600727091" />
     <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1602327432560">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -295,14 +306,14 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1602500464704" />
-    <state x="835" y="409" width="336" height="248" key="com.intellij.database.actions.DdlActions$DeleteProvider2$1" timestamp="1602588077691">
+    <state x="835" y="409" width="336" height="251" key="com.intellij.database.actions.DdlActions$DeleteProvider2$1" timestamp="1602599231343">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="835" y="409" width="336" height="248" key="com.intellij.database.actions.DdlActions$DeleteProvider2$1/0.0.1920.1040@0.0.1920.1040" timestamp="1602588077691" />
-    <state x="816" y="266" key="com.intellij.database.view.ui.AbstractDbRefactoringDialog" timestamp="1602582955084">
+    <state x="835" y="409" width="336" height="251" key="com.intellij.database.actions.DdlActions$DeleteProvider2$1/0.0.1920.1040@0.0.1920.1040" timestamp="1602599231343" />
+    <state x="474" y="68" width="487" height="778" key="com.intellij.database.view.ui.AbstractDbRefactoringDialog" timestamp="1602600452945">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="816" y="266" key="com.intellij.database.view.ui.AbstractDbRefactoringDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602582955084" />
+    <state x="474" y="68" width="487" height="778" key="com.intellij.database.view.ui.AbstractDbRefactoringDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602600452945" />
     <state x="662" y="252" width="679" height="536" key="find.popup" timestamp="1602319770216">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

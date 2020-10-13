@@ -3,7 +3,7 @@ use std::iter::FromIterator;
 
 use anyhow::Result;
 use http_types::{Method, Request, Response, Url};
-use log::{debug, error, info};
+use log::{debug, error, info, warn};
 use serde_derive::{Deserialize, Serialize};
 use smol::net::TcpStream;
 use smol::stream::StreamExt;
@@ -150,6 +150,7 @@ async fn count(id: usize, page: u16) -> Result<CodeStatistics> {
         }
     }
 
+    warn!("page {} 共计 {} 条", page, commits.len());
     sqlite::save(commits).await?;
 
     Ok(statistics)

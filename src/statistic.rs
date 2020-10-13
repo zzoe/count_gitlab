@@ -78,7 +78,8 @@ pub struct Commits {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Record {
-    pub id: String,
+    #[serde(rename(deserialize = "id"))]
+    pub full_id: String,
     pub short_id: String,
     pub author_name: String,
     pub author_email: String,
@@ -109,7 +110,7 @@ async fn count(id: usize, page: u16) -> Result<CodeStatistics> {
     let mut statistics = CodeStatistics::new();
     let mut commits = Vec::new();
     for record in records {
-        commits.push(sqlite::Commits::from(record.clone()));
+        commits.push(sqlite::CommitLog::from(id, record.clone()));
 
         if record.parent_ids.len() > 1 {
             continue;
@@ -149,7 +150,7 @@ async fn count(id: usize, page: u16) -> Result<CodeStatistics> {
         }
     }
 
-    sqlite::save(id, commits).await?;
+    sqlite::save(commits).await?;
 
     Ok(statistics)
 }

@@ -25,3 +25,7 @@ rbatis-macro-driver = "*"
 #strum = "*"
 #strum_macros = "*"
 util = { git = "https://gitee.com/zzoe/util" }
+
+[dev-dependencies]
+fast_log = "*"
+async-std = { version = "*", features = ["attributes"] }

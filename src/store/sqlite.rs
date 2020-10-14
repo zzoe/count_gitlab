@@ -1,5 +1,5 @@
 use anyhow::Result;
-use log::warn;
+use log::info;
 use rbatis::crud::{CRUDEnable, CRUD};
 use serde::{Deserialize, Serialize};
 
@@ -8,16 +8,12 @@ use crate::RB;
 
 pub async fn save(records: Vec<CommitLog>) -> Result<()> {
     let mut count = 0;
-    let rb = RB.lock().await;
-
-    rb.begin("commit_log").await.expect("begin error");
 
     for record in &records {
-        count += rb.save("", record).await?;
+        count += RB.save("", record).await?;
     }
 
-    rb.commit("commit_log").await.expect("commit error");
-    warn!("save {} of {}", count, records.len());
+    info!("save {} of {}", count, records.len());
 
     Ok(())
 }

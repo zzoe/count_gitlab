@@ -3,7 +3,6 @@ use std::iter::FromIterator;
 use log::{error, info, warn};
 use once_cell::sync::Lazy;
 use rbatis::rbatis::Rbatis;
-use smol::lock::Mutex;
 use smol::stream::StreamExt;
 use util::stream_vec::StreamVec;
 
@@ -16,11 +15,11 @@ pub mod store;
 pub static CONFIG: Lazy<Config> =
     Lazy::new(|| smol::block_on(config::init()).expect("读取配置文件失败"));
 
-pub static RB: Lazy<Mutex<Rbatis>> = Lazy::new(|| Mutex::new(Rbatis::new()));
+pub static RB: Lazy<Rbatis> = Lazy::new(Rbatis::new);
 
 fn main() {
     if std::env::var("RUST_LOG").is_err() {
-        std::env::set_var("RUST_LOG", "warn");
+        std::env::set_var("RUST_LOG", "info");
     }
 
     if std::env::var("SMOL_THREADS").is_err() {
@@ -54,13 +53,12 @@ async fn run() {
 }
 
 async fn init() {
-    let rb = RB.lock().await;
-    rb.link("sqlite://gitlab.db")
+    RB.link("sqlite://gitlab.db")
         .await
         .expect("link sqlite fail");
 
     let drop_sql = "drop table commit_log";
-    if let Err(e) = rb.exec("", drop_sql).await {
+    if let Err(e) = RB.exec("", drop_sql).await {
         warn!("{}", e);
     }
 
@@ -82,5 +80,5 @@ async fn init() {
             deletions text not null,
             constraint commit_log_pk primary key (id, full_id)
         )";
-    rb.exec("", create_sql).await.expect("crate table fail");
+    RB.exec("", create_sql).await.expect("crate table fail");
 }

@@ -185,7 +185,8 @@
       <workItem from="1602298113784" duration="702000" />
       <workItem from="1602301368467" duration="10329000" />
       <workItem from="1602478792281" duration="5958000" />
-      <workItem from="1602551042435" duration="9011000" />
+      <workItem from="1602551042435" duration="9926000" />
+      <workItem from="1602636246310" duration="2665000" />
     </task>
     <task id="LOCAL-00001" summary="按天统计，保存csv">
       <created>1601193784164</created>
@@ -215,7 +216,14 @@
       <option name="project" value="LOCAL" />
       <updated>1602500463232</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="sqlite 未完">
+      <created>1602589275156</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1602589275156</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -226,7 +234,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/master" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -238,46 +258,47 @@
     <MESSAGE value="config" />
     <MESSAGE value="StoreType" />
     <MESSAGE value="sqlite未完" />
-    <option name="LAST_COMMIT_MESSAGE" value="sqlite未完" />
+    <MESSAGE value="sqlite 未完" />
+    <option name="LAST_COMMIT_MESSAGE" value="sqlite 未完" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="334" y="361" key="#SQL_Dialects" timestamp="1602599333884">
+    <state x="334" y="361" key="#SQL_Dialects" timestamp="1602583035845">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="334" y="361" key="#SQL_Dialects/0.0.1920.1040@0.0.1920.1040" timestamp="1602599333884" />
-    <state x="552" y="178" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1602598607287">
+    <state x="334" y="361" key="#SQL_Dialects/0.0.1920.1040@0.0.1920.1040" timestamp="1602583035845" />
+    <state x="552" y="178" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1602580914766">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="178" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602598607287" />
+    <state x="552" y="178" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602580914766" />
     <state x="765" y="236" key="#com.intellij.ide.util.MemberChooser" timestamp="1602551223380">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="765" y="236" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1602551223380" />
-    <state x="184" y="86" key="DiffContextDialog" timestamp="1602327425806">
+    <state x="184" y="86" width="1536" height="860" key="DiffContextDialog" timestamp="1602638998524">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="184" y="86" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602327425806" />
-    <state x="880" y="424" key="FileChooserDialogImpl" timestamp="1602598590467">
+    <state x="184" y="86" width="1536" height="860" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602638998524" />
+    <state x="880" y="424" key="FileChooserDialogImpl" timestamp="1602580852420">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="526" y="193" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1601650761507" />
-    <state x="880" y="424" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1602598590467" />
-    <state width="1877" height="282" key="GridCell.Tab.0.bottom" timestamp="1602600727091">
+    <state x="880" y="424" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1602580852420" />
+    <state width="1293" height="282" key="GridCell.Tab.0.bottom" timestamp="1602637460893">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1602600727091" />
-    <state width="1877" height="282" key="GridCell.Tab.0.center" timestamp="1602600727091">
+    <state width="1293" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1602637460893" />
+    <state width="1293" height="282" key="GridCell.Tab.0.center" timestamp="1602637460893">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1602600727091" />
-    <state width="1877" height="282" key="GridCell.Tab.0.left" timestamp="1602600727091">
+    <state width="1293" height="282" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1602637460893" />
+    <state width="1293" height="282" key="GridCell.Tab.0.left" timestamp="1602637460893">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1602600727091" />
-    <state width="1877" height="282" key="GridCell.Tab.0.right" timestamp="1602600727091">
+    <state width="1293" height="282" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1602637460893" />
+    <state width="1293" height="282" key="GridCell.Tab.0.right" timestamp="1602637460893">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1602600727091" />
+    <state width="1293" height="282" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1602637460893" />
     <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1602327432560">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -298,26 +319,34 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="220" height="477" key="HiddenNamespacesPopup/0.0.1920.1040@0.0.1920.1040" timestamp="1602580935594" />
-    <state x="780" y="221" key="RollbackChangesDialog" timestamp="1602327282809">
+    <state x="184" y="86" key="MergeDialog" timestamp="1602636335820">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="780" y="221" key="RollbackChangesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602327282809" />
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1602500464704">
+    <state x="184" y="86" key="MergeDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602636335820" />
+    <state x="780" y="221" key="RollbackChangesDialog" timestamp="1602589235592">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1602500464704" />
-    <state x="835" y="409" width="336" height="251" key="com.intellij.database.actions.DdlActions$DeleteProvider2$1" timestamp="1602599231343">
+    <state x="780" y="221" key="RollbackChangesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602589235592" />
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1602589276930">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="835" y="409" width="336" height="251" key="com.intellij.database.actions.DdlActions$DeleteProvider2$1/0.0.1920.1040@0.0.1920.1040" timestamp="1602599231343" />
-    <state x="474" y="68" width="487" height="778" key="com.intellij.database.view.ui.AbstractDbRefactoringDialog" timestamp="1602600452945">
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1602589276930" />
+    <state x="835" y="409" width="336" height="248" key="com.intellij.database.actions.DdlActions$DeleteProvider2$1" timestamp="1602588077691">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="474" y="68" width="487" height="778" key="com.intellij.database.view.ui.AbstractDbRefactoringDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602600452945" />
-    <state x="662" y="252" width="679" height="536" key="find.popup" timestamp="1602319770216">
+    <state x="835" y="409" width="336" height="248" key="com.intellij.database.actions.DdlActions$DeleteProvider2$1/0.0.1920.1040@0.0.1920.1040" timestamp="1602588077691" />
+    <state x="816" y="266" key="com.intellij.database.view.ui.AbstractDbRefactoringDialog" timestamp="1602582955084">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="662" y="252" width="679" height="536" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1602319770216" />
+    <state x="816" y="266" key="com.intellij.database.view.ui.AbstractDbRefactoringDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602582955084" />
+    <state x="662" y="252" width="679" height="536" key="find.popup" timestamp="1602638955390">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="662" y="252" width="679" height="536" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1602638955390" />
+    <state x="721" y="232" key="git4idea.branch.GitSmartOperationDialog" timestamp="1602636261042">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="721" y="232" key="git4idea.branch.GitSmartOperationDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602636261042" />
     <state x="616" y="240" width="672" height="677" key="run.anything.popup" timestamp="1602317526579">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

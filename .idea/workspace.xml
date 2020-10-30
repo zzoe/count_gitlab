@@ -40,8 +40,6 @@
     <list default="true" id="d8ec18af-4963-464c-9975-a96bcb403e08" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/statistic.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/statistic.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/store/sqlite.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/store/sqlite.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,7 +75,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="cf.first.check.clang-format" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../rbatis" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="org.rust.cargo.project.model.PROJECT_DISCOVERY" value="true" />
     <property name="settings.editor.selected.configurable" value="language.rust" />
@@ -95,11 +93,6 @@
     </option>
   </component>
   <component name="RunManager" selected="Cargo.Test store::sqlite::test::test_save">
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Test store::sqlite::test::test_save" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
       <option name="command" value="test --package count_gitlab --bin count_gitlab store::sqlite::test::test_save -- --exact" />
@@ -186,7 +179,8 @@
       <workItem from="1602301368467" duration="10329000" />
       <workItem from="1602478792281" duration="5958000" />
       <workItem from="1602551042435" duration="9926000" />
-      <workItem from="1602636246310" duration="2665000" />
+      <workItem from="1602636246310" duration="4695000" />
+      <workItem from="1604048875930" duration="13000" />
     </task>
     <task id="LOCAL-00001" summary="按天统计，保存csv">
       <created>1601193784164</created>
@@ -223,7 +217,14 @@
       <option name="project" value="LOCAL" />
       <updated>1602589275156</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="commits条数对不上与程序无关，是由于导出sqlite.db时未包含db-wal和db-shm文件导致。">
+      <created>1602639678344</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1602639678344</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -259,7 +260,8 @@
     <MESSAGE value="StoreType" />
     <MESSAGE value="sqlite未完" />
     <MESSAGE value="sqlite 未完" />
-    <option name="LAST_COMMIT_MESSAGE" value="sqlite 未完" />
+    <MESSAGE value="commits条数对不上与程序无关，是由于导出sqlite.db时未包含db-wal和db-shm文件导致。" />
+    <option name="LAST_COMMIT_MESSAGE" value="commits条数对不上与程序无关，是由于导出sqlite.db时未包含db-wal和db-shm文件导致。" />
   </component>
   <component name="WindowStateProjectService">
     <state x="334" y="361" key="#SQL_Dialects" timestamp="1602583035845">
@@ -278,11 +280,11 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="184" y="86" width="1536" height="860" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602638998524" />
-    <state x="880" y="424" key="FileChooserDialogImpl" timestamp="1602580852420">
+    <state x="880" y="424" key="FileChooserDialogImpl" timestamp="1602650417980">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="526" y="193" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1601650761507" />
-    <state x="880" y="424" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1602580852420" />
+    <state x="880" y="424" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1602650417980" />
     <state width="1293" height="282" key="GridCell.Tab.0.bottom" timestamp="1602637460893">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -327,10 +329,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="780" y="221" key="RollbackChangesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1602589235592" />
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1602589276930">
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1602639680016">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1602589276930" />
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1602639680016" />
     <state x="835" y="409" width="336" height="248" key="com.intellij.database.actions.DdlActions$DeleteProvider2$1" timestamp="1602588077691">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

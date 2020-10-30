@@ -63,7 +63,7 @@ async fn init() {
     }
 
     let create_sql = "create table commit_log (
-            id number not null,
+            id integer not null,
             full_id text not null,
             short_id text not null,
             author_name text not null,
@@ -76,8 +76,8 @@ async fn init() {
             title text not null,
             message text not null,
             parent_ids text not null,
-            additions text not null,
-            deletions text not null,
+            additions integer not null,
+            deletions integer not null,
             constraint commit_log_pk primary key (id, full_id)
         )";
     RB.exec("", create_sql).await.expect("crate table fail");

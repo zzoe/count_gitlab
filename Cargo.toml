@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 log = "*"
-pretty_env_logger = "*"
+log4rs = "*"
 anyhow = "*"
 toml = "*"
 serde = "*"
@@ -17,15 +17,12 @@ num_cpus = "*"
 smol = "*"
 http-types = "*"
 async-h1 = "*"
-chrono = "*"
+#chrono = "*"
 once_cell = "*"
-rbatis = "*"
-rbatis-core = { version = "*", features = ["sqlite"] }
-rbatis-macro-driver = "*"
+rusqlite = { version = "*", features = ["bundled"] }
+simple_excel_writer = "*"
 #strum = "*"
 #strum_macros = "*"
 util = { git = "https://gitee.com/zzoe/util" }
 
 [dev-dependencies]
-fast_log = "*"
-async-std = { version = "*", features = ["attributes"] }

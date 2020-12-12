@@ -12,3 +12,5 @@ Cargo.lock
 .idea
 config.toml
 *.log
+/count_gitlab
+/gitlab.db

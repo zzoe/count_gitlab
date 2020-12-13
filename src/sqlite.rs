@@ -1,5 +1,5 @@
 use anyhow::Result;
-use log::info;
+use log::{info};
 use rusqlite::{Connection, Statement, NO_PARAMS};
 
 use crate::gitlab::CommitLogs;
@@ -30,6 +30,7 @@ pub fn connect() -> Result<Connection> {
          )",
         NO_PARAMS,
     )?;
+    conn.execute("delete from commit_log ", NO_PARAMS)?;
 
     Ok(conn)
 }

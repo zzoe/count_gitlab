@@ -14,10 +14,9 @@ use crate::CONFIG;
 pub async fn deal_project(id: ProjectID) -> Result<CommitLogs> {
     let page = 0;
     let res = query(id, page).await?;
-    debug!("HEAD: {:#?}", res);
     debug!("x-total-pages: {:?}", res.header("x-total-pages"));
     let total = res.header("x-total-pages").map_or_else(
-        || 1_u16,
+        || 0_u16,
         |h| {
             let v = h.get(0).expect("未获取到总条数");
             v.to_string().parse::<u16>().unwrap_or(1_u16)
@@ -31,6 +30,7 @@ pub async fn deal_project(id: ProjectID) -> Result<CommitLogs> {
             let mut res = query(id, page).await?;
             let mut logs: CommitLogs = res.body_json().await.map_err(|e| anyhow!(e))?;
             logs.iter_mut().for_each(|log| log.project_id = id.0);
+            info!("{:?}", logs);
             Ok(logs)
         }));
     }
@@ -51,7 +51,8 @@ pub type CommitLogs = Vec<CommitLog>;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct CommitLog {
-    pub project_id: usize,
+    #[serde(default = "u32::default")]
+    pub project_id: u32,
     #[serde(rename(deserialize = "id"))]
     pub full_id: String,
     pub short_id: String,
@@ -70,8 +71,8 @@ pub struct CommitLog {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Stats {
-    pub additions: usize,
-    pub deletions: usize,
+    pub additions: u32,
+    pub deletions: u32,
 }
 
 #[derive(Serialize)]
@@ -83,7 +84,7 @@ struct Query {
 }
 
 async fn query(id: ProjectID, page: u16) -> Result<Response> {
-    let url = Url::parse(&*CONFIG.git.addr)?
+    let url = Url::parse(&*CONFIG.gitlab.addr)?
         .join(&*format!("api/v4/projects/{}/repository/commits/", id.0))?;
 
     let query = Query {
@@ -100,7 +101,7 @@ async fn query(id: ProjectID, page: u16) -> Result<Response> {
     info!("{}: {}", method, url.as_str());
 
     let mut req = Request::new(method, url);
-    req.insert_header("PRIVATE-TOKEN", &*CONFIG.git.token);
+    req.insert_header("PRIVATE-TOKEN", &*CONFIG.gitlab.token);
     req.set_query(&query).map_err(|e| {
         error!("设置查询条件失败: {}", e);
         anyhow::anyhow!("设置查询条件失败")
@@ -115,7 +116,7 @@ async fn query(id: ProjectID, page: u16) -> Result<Response> {
         })?
         .into_iter()
         .next()
-        .ok_or_else(|| anyhow::anyhow!("Invalid gitlab address: {}", CONFIG.git.addr))?;
+        .ok_or_else(|| anyhow::anyhow!("Invalid gitlab address: {}", CONFIG.gitlab.addr))?;
 
     let stream = TcpStream::connect(addr).await?;
     req.set_peer_addr(stream.peer_addr().ok());

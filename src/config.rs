@@ -9,7 +9,7 @@ use std::fmt::Display;
 pub struct Config {
     pub store_type: StoreType,
     pub sqlite: String,
-    pub git: Git,
+    pub gitlab: Gitlab,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -18,14 +18,14 @@ pub enum StoreType {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Git {
+pub struct Gitlab {
     pub addr: String,
     pub token: String,
     pub ids: Vec<ProjectID>,
 }
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize)]
-pub struct ProjectID(pub usize);
+pub struct ProjectID(pub u32);
 
 impl Display for ProjectID {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -53,8 +53,8 @@ async fn init_config(cfg_name: &str) -> Result<()> {
     let cfg = Config {
         store_type: StoreType::SQLite,
         sqlite: "gitlab.db".to_string(),
-        git: Git {
-            addr: "http://devgit.z-bank.com".to_string(),
+        gitlab: Gitlab {
+            addr: "http://devgit.z-bank.com/".to_string(),
             token: "".to_string(),
             ids: vec![ProjectID(705), ProjectID(706), ProjectID(715)],
         },

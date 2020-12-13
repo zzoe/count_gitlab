@@ -32,7 +32,7 @@ fn main() {
 async fn run() -> Result<()> {
     let mut tasks = Vec::new();
 
-    for id in &CONFIG.git.ids {
+    for id in &CONFIG.gitlab.ids {
         tasks.push(smol::spawn(async move { gitlab::deal_project(*id).await }));
     }
 
@@ -40,18 +40,22 @@ async fn run() -> Result<()> {
     let conn = sqlite::connect()?;
     let mut stmt = sqlite::prepare_insert(&conn)?;
 
-    let mut fail = 0_usize;
+    let mut fail = 0_u32;
     while let Some(res) = tasks.next().await {
         if let Err(e) = res.and_then(|logs| sqlite::insert(&mut stmt, logs)) {
-            error!("{}", e);
+            error!("保存项目提交记录失败: {}", e);
             fail += 1;
         }
     }
 
-    info!("统计结束: {}个项目，失败{}个 ", CONFIG.git.ids.len(), fail);
+    info!(
+        "统计结束: {}个项目，失败{}个 ",
+        CONFIG.gitlab.ids.len(),
+        fail
+    );
 
     if fail == 0 {
-        excel::create(&conn)
+        excel::create(&conn)?
     }
 
     Ok(())

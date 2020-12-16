@@ -1,8 +1,8 @@
 use std::iter::FromIterator;
 
 use anyhow::{anyhow, Result};
-use http_types::{Method, Request, Response, Url};
-use log::{debug, error, info};
+use http_types::{Method, Request, Response, StatusCode, Url};
+use log::{debug, error, info, trace};
 use serde_derive::{Deserialize, Serialize};
 use smol::net::TcpStream;
 use smol::stream::StreamExt;
@@ -14,8 +14,13 @@ use crate::CONFIG;
 pub async fn deal_project(id: ProjectID) -> Result<CommitLogs> {
     let page = 0;
     let res = query(id, page).await?;
-    debug!("x-total-pages: {:?}", res.header("x-total-pages"));
-    let total = res.header("x-total-pages").map_or_else(
+
+    if res.status().eq(&StatusCode::Unauthorized) {
+        anyhow::bail!("Unauthorized")
+    }
+
+    debug!("x-total-pages: {:?}", res.header("X-Total-Pages"));
+    let total = res.header("X-Total-Pages").map_or_else(
         || 0_u16,
         |h| {
             let v = h.get(0).expect("未获取到总条数");
@@ -30,7 +35,7 @@ pub async fn deal_project(id: ProjectID) -> Result<CommitLogs> {
             let mut res = query(id, page).await?;
             let mut logs: CommitLogs = res.body_json().await.map_err(|e| anyhow!(e))?;
             logs.iter_mut().for_each(|log| log.project_id = id.0);
-            info!("{:?}", logs);
+            trace!("{:?}", logs);
             Ok(logs)
         }));
     }
@@ -98,7 +103,7 @@ async fn query(id: ProjectID, page: u16) -> Result<Response> {
         0 => Method::Head,
         _ => Method::Get,
     };
-    info!("{}: {}", method, url.as_str());
+    trace!("{}: {}", method, url.as_str());
 
     let mut req = Request::new(method, url);
     req.insert_header("PRIVATE-TOKEN", &*CONFIG.gitlab.token);

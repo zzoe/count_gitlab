@@ -3,7 +3,7 @@ use std::ops::Add;
 
 use anyhow::Result;
 use chrono::{Date, Datelike, Duration, Local, NaiveDate, TimeZone};
-use log::info;
+use log::{debug, info};
 use rusqlite::{Connection, Statement};
 use serde_derive::{Deserialize, Serialize};
 use simple_excel_writer::{Row, SheetWriter, Workbook};
@@ -28,6 +28,7 @@ pub fn create(conn: &Connection) -> Result<()> {
     Ok(())
 }
 
+#[derive(Debug)]
 struct Record {
     project_id: ProjectID,
     author: Author,
@@ -79,7 +80,9 @@ struct Author(String);
 impl Display for Author {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &*self.0 {
-            "" => write!(f, "张三"),
+            "jz_liyinzheng" => write!(f, "李银政"),
+            "jz_yanshuang" => write!(f, "严爽"),
+            "jz_zhaizhengwei" => write!(f, "翟正伟"),
             other => write!(f, "未识别的开发人员[{}]", other),
         }
     }
@@ -121,11 +124,12 @@ fn gen_report(
     end: Date<Local>,
 ) -> Result<()> {
     let days = end.signed_duration_since(start).num_days();
+    info!("days: {} [{} - {}]", days, start, end);
     let records = stmt.query_map_named(
         &[
             (":days", &days),
-            (":start", &&*start.format("%Y%m%d").to_string()),
-            (":end", &&*end.format("%Y%m%d").to_string()),
+            (":start", &&*start.format("%F").to_string()),
+            (":end", &&*end.format("%F").to_string()),
         ],
         |row| {
             Ok(Record {
@@ -140,6 +144,7 @@ fn gen_report(
     let mut last_record = Records::default();
     for record_res in records {
         let record = record_res?;
+        debug!("{:?}", record);
 
         if record.author.0.eq(&last_record.author.0) {
             last_record.add(&record);
@@ -150,6 +155,7 @@ fn gen_report(
             last_record.add(&record);
             last_record.author = record.author;
         }
+        debug!("last_record: {:?}", last_record);
     }
     report.push(last_record.clear());
 

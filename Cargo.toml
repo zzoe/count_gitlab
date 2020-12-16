@@ -1,6 +1,6 @@
 [package]
 name = "count_gitlab"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["zoe <zoe211@163.com>"]
 edition = "2018"
 

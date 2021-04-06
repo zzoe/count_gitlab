@@ -1,64 +1,66 @@
+use std::collections::HashMap;
+use std::fmt::{Display, Formatter};
+use std::fs;
 use std::path::Path;
 
 use anyhow::Result;
-use serde::export::Formatter;
 use serde_derive::{Deserialize, Serialize};
-use std::fmt::Display;
+
+use crate::CONFIG;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Config {
-    pub store_type: StoreType,
+    pub threads: usize,
     pub sqlite: String,
     pub gitlab: Gitlab,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum StoreType {
-    SQLite,
+    pub account: HashMap<String, String>,
+    pub project: HashMap<String, String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Gitlab {
     pub addr: String,
     pub token: String,
-    pub ids: Vec<ProjectID>,
 }
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize)]
-pub struct ProjectID(pub u32);
+pub struct ProjectId(pub u32);
 
-impl Display for ProjectID {
+impl Display for ProjectId {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self.0 {
-            705 => write!(f, "综合理财后管"),
-            706 => write!(f, "综合理财"),
-            715 => write!(f, "综合理财底层"),
-            other => write!(f, "未识别的项目代码[{}]", other),
-        }
+        let id = self.0.to_string();
+        let value = CONFIG.project.get(&id).unwrap_or(&id);
+        write!(f, "{}", value)
     }
 }
 
-pub async fn init() -> Result<Config> {
+pub fn init() -> Result<Config> {
     let cfg_name = "config.toml";
-    init_config(cfg_name).await?;
-    let res = smol::fs::read_to_string(cfg_name).await?;
+    init_config(cfg_name)?;
+    let res = fs::read_to_string(cfg_name)?;
     Ok(toml::from_str::<Config>(&*res)?)
 }
 
-async fn init_config(cfg_name: &str) -> Result<()> {
+fn init_config(cfg_name: &str) -> Result<()> {
     if Path::new(cfg_name).exists() {
         return Ok(());
     }
 
+    let mut account = HashMap::new();
+    account.insert("zs".to_string(), "张三".to_string());
+    let mut project = HashMap::new();
+    project.insert("705".to_string(), "综合理财".to_string());
+
     let cfg = Config {
-        store_type: StoreType::SQLite,
+        threads: num_cpus::get(),
         sqlite: "gitlab.db".to_string(),
         gitlab: Gitlab {
             addr: "http://devgit.z-bank.com/".to_string(),
             token: "".to_string(),
-            ids: vec![ProjectID(705), ProjectID(706), ProjectID(715)],
         },
+        account,
+        project,
     };
 
-    Ok(smol::fs::write(cfg_name, toml::to_string_pretty(&cfg)?).await?)
+    Ok(fs::write(cfg_name, toml::to_string_pretty(&cfg)?)?)
 }

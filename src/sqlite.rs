@@ -1,6 +1,6 @@
 use anyhow::Result;
-use log::{info};
-use rusqlite::{Connection, Statement, NO_PARAMS};
+use log::info;
+use rusqlite::{Connection, Statement};
 
 use crate::gitlab::CommitLogs;
 use crate::CONFIG;
@@ -28,9 +28,9 @@ pub fn connect() -> Result<Connection> {
              deletions integer not null,
              constraint commit_log_pk primary key (project_id, full_commit_id)
          )",
-        NO_PARAMS,
+        [],
     )?;
-    conn.execute("delete from commit_log ", NO_PARAMS)?;
+    conn.execute("delete from commit_log ", [])?;
 
     Ok(conn)
 }
@@ -41,7 +41,7 @@ pub fn prepare_insert(conn: &Connection) -> Result<Statement> {
 
 pub fn insert(stmt: &mut Statement, logs: CommitLogs) -> Result<()> {
     for log in logs {
-        stmt.execute(&[
+        stmt.execute([
             log.project_id.to_string(),
             log.full_id,
             log.short_id,

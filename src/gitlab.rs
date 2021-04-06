@@ -1,17 +1,15 @@
-use std::iter::FromIterator;
-
 use anyhow::{anyhow, Result};
 use http_types::{Method, Request, Response, StatusCode, Url};
 use log::{debug, error, info, trace};
 use serde_derive::{Deserialize, Serialize};
-use smol::net::TcpStream;
-use smol::stream::StreamExt;
-use util::stream_vec::StreamVec;
 
-use crate::config::ProjectID;
-use crate::CONFIG;
+use crate::config::ProjectId;
+use crate::{CONFIG, EXECUTOR};
+use async_net::TcpStream;
+use futures_lite::StreamExt;
+use util::Select;
 
-pub async fn deal_project(id: ProjectID) -> Result<CommitLogs> {
+pub async fn deal_project(id: ProjectId) -> Result<CommitLogs> {
     let page = 0;
     let res = query(id, page).await?;
 
@@ -29,9 +27,9 @@ pub async fn deal_project(id: ProjectID) -> Result<CommitLogs> {
     );
     info!("总页数： {}", total);
 
-    let mut tasks = Vec::new();
+    let mut tasks = Select(Vec::new());
     for page in 1..total + 1 {
-        tasks.push(smol::spawn(async move {
+        tasks.0.push(EXECUTOR.spawn(async move {
             let mut res = query(id, page).await?;
             let mut logs: CommitLogs = res.body_json().await.map_err(|e| anyhow!(e))?;
             logs.iter_mut().for_each(|log| log.project_id = id.0);
@@ -41,7 +39,6 @@ pub async fn deal_project(id: ProjectID) -> Result<CommitLogs> {
     }
 
     let mut commit_logs = CommitLogs::new();
-    let mut tasks = StreamVec::from_iter(tasks);
     while let Some(logs_res) = tasks.next().await {
         match logs_res {
             Ok(mut logs) => commit_logs.append(&mut logs),
@@ -88,7 +85,7 @@ struct Query {
     with_stats: bool,
 }
 
-async fn query(id: ProjectID, page: u16) -> Result<Response> {
+async fn query(id: ProjectId, page: u16) -> Result<Response> {
     let url = Url::parse(&*CONFIG.gitlab.addr)?
         .join(&*format!("api/v4/projects/{}/repository/commits/", id.0))?;
 

@@ -23,7 +23,7 @@ pub struct Gitlab {
     pub token: String,
 }
 
-#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ProjectId(pub u32);
 
 impl Display for ProjectId {
@@ -34,6 +34,14 @@ impl Display for ProjectId {
     }
 }
 
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub struct Author(pub String);
+
+impl Display for Author {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", CONFIG.account.get(&self.0).unwrap_or(&self.0))
+    }
+}
 pub fn init() -> Result<Config> {
     let cfg_name = "config.toml";
     init_config(cfg_name)?;

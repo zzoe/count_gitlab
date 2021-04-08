@@ -2,13 +2,10 @@ use anyhow::Result;
 use log::info;
 use rusqlite::{Connection, Statement};
 
+use crate::config::ProjectId;
 use crate::gitlab::CommitLogs;
-use crate::CONFIG;
 
-pub fn connect() -> Result<Connection> {
-    let conn = Connection::open(&*CONFIG.sqlite)?;
-    info!("{}", conn.is_autocommit());
-
+pub fn init(conn: &Connection) -> Result<Statement> {
     conn.execute(
         "create table if not exists commit_log (
              project_id integer not null,
@@ -32,14 +29,20 @@ pub fn connect() -> Result<Connection> {
     )?;
     conn.execute("delete from commit_log ", [])?;
 
-    Ok(conn)
-}
-
-pub fn prepare_insert(conn: &Connection) -> Result<Statement> {
-    Ok(conn.prepare("insert into commit_log values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")?)
+    let stmt = conn.prepare("insert into commit_log values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")?;
+    Ok(stmt)
 }
 
 pub fn insert(stmt: &mut Statement, logs: CommitLogs) -> Result<()> {
+    if logs.is_empty() {
+        return Ok(());
+    }
+
+    let log = logs.get(0).unwrap();
+    let id = ProjectId(log.project_id);
+    info!("开始插入{}-{}条记录", id, logs.len());
+    let start = std::time::Instant::now();
+
     for log in logs {
         stmt.execute([
             log.project_id.to_string(),
@@ -59,5 +62,7 @@ pub fn insert(stmt: &mut Statement, logs: CommitLogs) -> Result<()> {
             log.stats.deletions.to_string(),
         ])?;
     }
+
+    info!("结束插入{},耗时{}ms", id, start.elapsed().as_millis());
     Ok(())
 }

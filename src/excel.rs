@@ -1,14 +1,13 @@
-use std::fmt::{Display, Formatter};
+use std::collections::HashMap;
 use std::ops::Add;
 
 use anyhow::Result;
 use chrono::{Date, Datelike, Duration, Local, NaiveDate, TimeZone, Weekday};
 use log::{debug, info};
 use rusqlite::{Connection, Statement};
-use serde_derive::{Deserialize, Serialize};
 use simple_excel_writer::{Row, SheetWriter, Workbook};
 
-use crate::config::ProjectId;
+use crate::config::{Author, ProjectId};
 use crate::CONFIG;
 
 const SQL: &str = "SELECT c.project_id, c.author_name, count(1) as 'commit_times', sum(c.additions) as 'additions' \
@@ -20,8 +19,8 @@ const SQL: &str = "SELECT c.project_id, c.author_name, count(1) as 'commit_times
     group by c.project_id, c.author_name \
     order by c.author_name,c.project_id";
 
-pub fn create(conn: &Connection) -> Result<()> {
-    let [week, month] = query(conn)?;
+pub fn create() -> Result<()> {
+    let [week, month] = query()?;
 
     gen_file(week, "周报")?;
     gen_file(month, "月报")?;
@@ -29,51 +28,43 @@ pub fn create(conn: &Connection) -> Result<()> {
     Ok(())
 }
 
-//单人单项目
+//单账号单项目
 #[derive(Debug)]
-struct Record {
+struct RecordPerAccount {
     project_id: ProjectId,
     account: String,
     commit_times: u32,
     additions: u32,
 }
 
-//单人所有项目
+//单人单项目
 #[derive(Clone, Debug, Default)]
-struct Records {
+struct RecordPerAuthor {
     projects: Vec<ProjectId>,
-    account: String,
-    author: Author,
+    accounts: Vec<String>,
     commit_times: u32,
     additions: u32,
     additions_per_day: u32,
 }
 
-impl Records {
-    pub fn add(&mut self, record: &Record) {
-        self.projects.push(record.project_id);
-        self.author = Author(record.account.clone());
-        self.commit_times += record.commit_times;
-        self.additions += record.additions;
-    }
-    pub fn clear(&mut self) -> Self {
-        let mut object = Self::default();
-        std::mem::swap(self, &mut object);
-        object
-    }
-}
-
-impl From<Records> for Row {
-    fn from(records: Records) -> Self {
+impl From<RecordPerAuthor> for Row {
+    fn from(records: RecordPerAuthor) -> Self {
         let mut row = Row::new();
         row.add_cell(
             records
                 .projects
                 .iter()
-                .fold(String::new(), |i, p| format!("{}{}\n", i, p)),
+                .fold(String::new(), |i, p| format!("{}{}\n", i, p))
+                .trim(),
         );
-        row.add_cell(records.account);
-        row.add_cell(records.author.to_string());
+        row.add_cell(
+            records
+                .accounts
+                .iter()
+                .fold(String::new(), |i, a| format!("{}{}\n", i, a))
+                .trim(),
+        );
+        row.add_cell(Author(records.accounts.get(0).unwrap().clone()).to_string());
         row.add_cell(records.commit_times as f64);
         row.add_cell(records.additions as f64);
         row.add_cell(records.additions_per_day as f64);
@@ -81,31 +72,52 @@ impl From<Records> for Row {
     }
 }
 
-type Report = Vec<Records>;
+trait Report {
+    fn add(&mut self, record: RecordPerAccount);
+}
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
-struct Author(String);
-
-impl Display for Author {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", CONFIG.account.get(&*self.0).unwrap_or(&self.0))
+impl Report for HashMap<Author, RecordPerAuthor> {
+    fn add(&mut self, record: RecordPerAccount) {
+        let author = Author(record.account.clone());
+        match self.get_mut(&author) {
+            Some(record_per_author) => {
+                if !record_per_author.projects.contains(&record.project_id) {
+                    record_per_author.projects.push(record.project_id);
+                }
+                if !record_per_author.accounts.contains(&record.account) {
+                    record_per_author.accounts.push(record.account);
+                }
+                record_per_author.commit_times += record.commit_times;
+                record_per_author.additions += record.additions;
+            }
+            None => {
+                let new_record = RecordPerAuthor {
+                    projects: vec![record.project_id],
+                    accounts: vec![record.account],
+                    commit_times: record.commit_times,
+                    additions: record.additions,
+                    additions_per_day: 0,
+                };
+                self.insert(author, new_record);
+            }
+        }
     }
 }
 
-fn query(conn: &Connection) -> Result<[Report; 2]> {
+fn query() -> Result<[HashMap<Author, RecordPerAuthor>; 2]> {
     let today = chrono::Local::today();
-
+    let conn = Connection::open(&*CONFIG.sqlite)?;
     let mut stmt = conn.prepare(SQL)?;
 
     // 周报
-    let mut week_report = Report::new();
+    let mut week_report = HashMap::new();
     if today.weekday().eq(&Weekday::Mon) {
         let start = today.add(Duration::days(-7));
         gen_report(&mut stmt, &mut week_report, start, today)?;
     }
 
     // 月报
-    let mut month_report = Report::new();
+    let mut month_report = HashMap::new();
     if today.day().eq(&1) {
         let mut start_year = today.year();
         let mut start_month = today.month() - 1;
@@ -128,7 +140,7 @@ fn query(conn: &Connection) -> Result<[Report; 2]> {
 
 fn gen_report(
     stmt: &mut Statement,
-    report: &mut Report,
+    report: &mut HashMap<Author, RecordPerAuthor>,
     start: Date<Local>,
     end: Date<Local>,
 ) -> Result<()> {
@@ -140,7 +152,7 @@ fn gen_report(
             (":end", &end.format("%F").to_string()),
         ],
         |row| {
-            Ok(Record {
+            Ok(RecordPerAccount {
                 project_id: ProjectId(row.get(0)?),
                 account: row.get(1)?,
                 commit_times: row.get(2)?,
@@ -149,30 +161,20 @@ fn gen_report(
         },
     )?;
 
-    let mut last_record = Records::default();
     for record_res in records {
         let record = record_res?;
         debug!("{:?}", record);
-
-        if record.account.eq(&last_record.account) {
-            last_record.add(&record);
-        } else {
-            if !last_record.account.is_empty() {
-                last_record.additions_per_day = last_record.additions / days;
-                report.push(last_record.clear());
-            }
-            last_record.add(&record);
-            last_record.account = record.account;
-        }
-        debug!("last_record: {:?}", last_record);
+        report.add(record);
     }
-    last_record.additions_per_day = last_record.additions / days;
-    report.push(last_record.clear());
+
+    for record in report.values_mut() {
+        record.additions_per_day = record.additions / days;
+    }
 
     Ok(())
 }
 
-fn gen_file(report: Report, file_name: &str) -> Result<()> {
+fn gen_file(report: HashMap<Author, RecordPerAuthor>, file_name: &str) -> Result<()> {
     if report.is_empty() {
         return Ok(());
     }
@@ -186,8 +188,8 @@ fn gen_file(report: Report, file_name: &str) -> Result<()> {
     let mut sheet = wb.create_sheet("代码量统计");
     wb.write_sheet(&mut sheet, |sheet_writer| {
         add_title(sheet_writer)?;
-        for records in report {
-            sheet_writer.append_row(records.into())?;
+        for (_, record) in report {
+            sheet_writer.append_row(record.into())?;
         }
         Ok(())
     })?;

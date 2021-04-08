@@ -9,6 +9,7 @@ use once_cell::sync::Lazy;
 use util::Select;
 
 use crate::config::{Config, ProjectId};
+use rusqlite::Connection;
 
 mod config;
 pub mod excel;
@@ -34,34 +35,27 @@ fn main() {
     if let Err(e) = future::block_on(EXECUTOR.run(run())) {
         error!("统计失败: {}", e)
     }
+    info!("统计结束");
 }
 
 async fn run() -> Result<()> {
-    let mut tasks = Select(Vec::new());
+    let mut deal_tasks = Select(Vec::new());
 
     for id in CONFIG.project.keys() {
-        tasks
+        deal_tasks
             .0
             .push(EXECUTOR.spawn(gitlab::deal_project(ProjectId(id.parse()?))));
     }
 
-    let conn = sqlite::connect()?;
-    let mut stmt = sqlite::prepare_insert(&conn)?;
-
-    let mut fail = 0_u32;
-    while let Some(res) = tasks.next().await {
-        if let Err(e) = res.and_then(|logs| sqlite::insert(&mut stmt, logs)) {
-            error!("保存项目提交记录失败: {}", e);
-            fail += 1;
-        }
+    let conn = Connection::open(&*CONFIG.sqlite)?;
+    let mut stmt = sqlite::init(&conn)?;
+    while let Some(res) = deal_tasks.next().await {
+        let logs = res?;
+        sqlite::insert(&mut stmt, logs)?;
     }
+    info!("保存sqlite结束: {}个项目", CONFIG.project.len());
 
-    info!("统计结束: {}个项目，失败{}个 ", CONFIG.project.len(), fail);
-
-    if fail == 0 {
-        excel::create(&conn)?;
-        info!("写入excel成功");
-    }
+    excel::create()?;
 
     Ok(())
 }

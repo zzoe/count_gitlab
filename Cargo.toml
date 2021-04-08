@@ -16,15 +16,12 @@ serde_derive = "1"
 num_cpus = "1"
 async-executor = "1"
 async-net = "1"
-#async-io = "1"
 futures-lite = "1"
 http-types = "2"
 async-h1 = "2"
 once_cell = "1"
 rusqlite = { version = "0", features = ["bundled"] }
 simple_excel_writer = "0"
-#strum = "*"
-#strum_macros = "*"
 chrono = "0"
 util = { git = "https://gitee.com/zzoe/util", features=["select"] }
 

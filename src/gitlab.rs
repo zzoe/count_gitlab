@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 use http_types::{Method, Request, Response, StatusCode, Url};
-use log::{debug, error, info, trace};
+use log::{error, info, trace};
 use serde_derive::{Deserialize, Serialize};
 
 use crate::config::ProjectId;
@@ -17,7 +17,7 @@ pub async fn deal_project(id: ProjectId) -> Result<CommitLogs> {
         anyhow::bail!("Unauthorized")
     }
 
-    debug!("x-total-pages: {:?}", res.header("X-Total-Pages"));
+    trace!("x-total-pages: {:?}", res.header("X-Total-Pages"));
     let total = res.header("X-Total-Pages").map_or_else(
         || 0_u16,
         |h| {
@@ -25,12 +25,13 @@ pub async fn deal_project(id: ProjectId) -> Result<CommitLogs> {
             v.to_string().parse::<u16>().unwrap_or(1_u16)
         },
     );
-    info!("总页数： {}", total);
+    info!("{}总页数： {}", id, total);
 
     let mut tasks = Select(Vec::new());
     for page in 1..total + 1 {
         tasks.0.push(EXECUTOR.spawn(async move {
             let mut res = query(id, page).await?;
+            info!("{}第{}页查询结束", id, page);
             let mut logs: CommitLogs = res.body_json().await.map_err(|e| anyhow!(e))?;
             logs.iter_mut().for_each(|log| log.project_id = id.0);
             trace!("{:?}", logs);
@@ -124,5 +125,8 @@ async fn query(id: ProjectId, page: u16) -> Result<Response> {
     req.set_peer_addr(stream.peer_addr().ok());
     req.set_local_addr(stream.local_addr().ok());
 
+    if page.ne(&0) {
+        info!("开始查询{}第{}页", id, page);
+    }
     Ok(async_h1::connect(stream.clone(), req).await.unwrap())
 }

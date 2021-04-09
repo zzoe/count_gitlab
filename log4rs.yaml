@@ -4,12 +4,14 @@ appenders:
 
   stdout:
     kind: console
+    encoder:
+      pattern: "{date(%Y-%m-%d %H:%M:%S)} {level} {I} {file}:{line} {message}{n}"
 
   file:
     kind: rolling_file
     path: "log/app.log"
     encoder:
-      pattern: "{d(%Y-%m-%d %H:%M:%S)} - {I} - {l} - {m}{n}"
+      pattern: "{date(%Y-%m-%d %H:%M:%S)} {level} {I} {file}:{line} {message}{n}"
     policy:
       trigger:
         kind: size
@@ -23,4 +25,10 @@ root:
   level: debug
   appenders:
     - stdout
-    - file
+
+loggers:
+  count_gitlab:
+    level: debug
+    appenders:
+      - file
+    additive: false

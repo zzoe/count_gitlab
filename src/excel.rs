@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::ops::Add;
 
-use anyhow::Result;
 use chrono::{Date, Datelike, Duration, Local, NaiveDate, TimeZone, Weekday};
 use log::{debug, info};
 use rusqlite::{Connection, Statement};
@@ -19,13 +18,11 @@ const SQL: &str = "SELECT c.project_id, c.author_name, count(1) as 'commit_times
     group by c.project_id, c.author_name \
     order by c.author_name,c.project_id";
 
-pub fn create() -> Result<()> {
-    let [week, month] = query()?;
+pub fn create() {
+    let [week, month] = query();
 
-    gen_file(week, "周报")?;
-    gen_file(month, "月报")?;
-
-    Ok(())
+    gen_file(week, "周报");
+    gen_file(month, "月报");
 }
 
 //单账号单项目
@@ -104,16 +101,16 @@ impl Report for HashMap<Author, RecordPerAuthor> {
     }
 }
 
-fn query() -> Result<[HashMap<Author, RecordPerAuthor>; 2]> {
+fn query() -> [HashMap<Author, RecordPerAuthor>; 2] {
     let today = chrono::Local::today();
-    let conn = Connection::open(&*CONFIG.sqlite)?;
-    let mut stmt = conn.prepare(SQL)?;
+    let conn = Connection::open(&*CONFIG.sqlite).expect("连接数据库失败");
+    let mut stmt = conn.prepare(SQL).expect("prepare select statement 失败");
 
     // 周报
     let mut week_report = HashMap::new();
     if today.weekday().eq(&Weekday::Mon) {
         let start = today.add(Duration::days(-7));
-        gen_report(&mut stmt, &mut week_report, start, today)?;
+        gen_report(&mut stmt, &mut week_report, start, today);
     }
 
     // 月报
@@ -132,10 +129,10 @@ fn query() -> Result<[HashMap<Author, RecordPerAuthor>; 2]> {
             &mut month_report,
             Local.from_local_date(&start).unwrap(),
             today,
-        )?;
+        );
     }
 
-    Ok([week_report, month_report])
+    [week_report, month_report]
 }
 
 fn gen_report(
@@ -143,40 +140,44 @@ fn gen_report(
     report: &mut HashMap<Author, RecordPerAuthor>,
     start: Date<Local>,
     end: Date<Local>,
-) -> Result<()> {
+) {
     let days = end.signed_duration_since(start).num_days() as u32;
     info!("days: {} [{} - {}]", days, start, end);
-    let records = stmt.query_map(
-        &[
-            (":start", &start.format("%F").to_string()),
-            (":end", &end.format("%F").to_string()),
-        ],
-        |row| {
-            Ok(RecordPerAccount {
-                project_id: ProjectId(row.get(0)?),
-                account: row.get(1)?,
-                commit_times: row.get(2)?,
-                additions: row.get(3)?,
-            })
-        },
-    )?;
+    let records = stmt
+        .query_map(
+            &[
+                (":start", &start.format("%F").to_string()),
+                (":end", &end.format("%F").to_string()),
+            ],
+            |row| {
+                if row.column_count() != 4 {
+                    return Ok(None);
+                }
+                Ok(Some(RecordPerAccount {
+                    project_id: ProjectId(row.get(0).unwrap()),
+                    account: row.get(1).unwrap(),
+                    commit_times: row.get(2).unwrap(),
+                    additions: row.get(3).unwrap(),
+                }))
+            },
+        )
+        .expect("查询失败");
 
     for record_res in records {
-        let record = record_res?;
-        debug!("{:?}", record);
-        report.add(record);
+        if let Some(record) = record_res.unwrap() {
+            debug!("{:?}", record);
+            report.add(record);
+        }
     }
 
     for record in report.values_mut() {
         record.additions_per_day = record.additions / days;
     }
-
-    Ok(())
 }
 
-fn gen_file(report: HashMap<Author, RecordPerAuthor>, file_name: &str) -> Result<()> {
+fn gen_file(report: HashMap<Author, RecordPerAuthor>, file_name: &str) {
     if report.is_empty() {
-        return Ok(());
+        return;
     }
 
     let file_name = &*format!(
@@ -187,19 +188,20 @@ fn gen_file(report: HashMap<Author, RecordPerAuthor>, file_name: &str) -> Result
     let mut wb = Workbook::create(file_name);
     let mut sheet = wb.create_sheet("代码量统计");
     wb.write_sheet(&mut sheet, |sheet_writer| {
-        add_title(sheet_writer)?;
+        add_title(sheet_writer);
         for (_, record) in report {
-            sheet_writer.append_row(record.into())?;
+            sheet_writer
+                .append_row(record.into())
+                .expect("excel添加行数据失败");
         }
         Ok(())
-    })?;
-    wb.close()?;
+    })
+    .expect("excel写sheet失败");
+    wb.close().expect("excel写入结束失败");
     info!("生成文件：{}", file_name);
-
-    Ok(())
 }
 
-fn add_title(sheet_writer: &mut SheetWriter) -> std::io::Result<()> {
+fn add_title(sheet_writer: &mut SheetWriter) {
     let mut title = Row::new();
     title.add_cell("项目");
     title.add_cell("账号");
@@ -208,5 +210,5 @@ fn add_title(sheet_writer: &mut SheetWriter) -> std::io::Result<()> {
     title.add_cell("新增代码总行数");
     title.add_cell("日均新增代码行数");
 
-    sheet_writer.append_row(title)
+    sheet_writer.append_row(title).expect("excel添加表头失败")
 }

@@ -1,20 +1,20 @@
-use anyhow::{anyhow, Result};
+use async_net::TcpStream;
 use http_types::{Method, Request, Response, StatusCode, Url};
-use log::{error, info, trace};
+use log::{info, trace};
 use serde_derive::{Deserialize, Serialize};
+use util::Select;
 
 use crate::config::ProjectId;
 use crate::{CONFIG, EXECUTOR};
-use async_net::TcpStream;
+use async_channel::{Receiver, Sender};
 use futures_lite::StreamExt;
-use util::Select;
 
-pub async fn deal_project(id: ProjectId) -> Result<CommitLogs> {
+pub async fn deal_project(s: Sender<()>, r: Receiver<()>, id: ProjectId) -> CommitLogs {
     let page = 0;
-    let res = query(id, page).await?;
+    let res = query(id, page).await;
 
     if res.status().eq(&StatusCode::Unauthorized) {
-        anyhow::bail!("Unauthorized")
+        panic!("Unauthorized")
     }
 
     trace!("x-total-pages: {:?}", res.header("X-Total-Pages"));
@@ -29,25 +29,27 @@ pub async fn deal_project(id: ProjectId) -> Result<CommitLogs> {
 
     let mut tasks = Select(Vec::new());
     for page in 1..total + 1 {
+        let s = s.clone();
+        let r = r.clone();
         tasks.0.push(EXECUTOR.spawn(async move {
-            let mut res = query(id, page).await?;
+            s.send(()).await.expect("channel send fail");
+            let mut res = query(id, page).await;
             info!("{}第{}页查询结束", id, page);
-            let mut logs: CommitLogs = res.body_json().await.map_err(|e| anyhow!(e))?;
+            trace!("res: {:?}", res);
+            let mut logs: CommitLogs = res.body_json().await.expect("json解析失败");
             logs.iter_mut().for_each(|log| log.project_id = id.0);
             trace!("{:?}", logs);
-            Ok(logs)
+            r.recv().await.expect("channel receive fail");
+            logs
         }));
     }
 
     let mut commit_logs = CommitLogs::new();
-    while let Some(logs_res) = tasks.next().await {
-        match logs_res {
-            Ok(mut logs) => commit_logs.append(&mut logs),
-            e => return e,
-        }
+    while let Some(mut logs) = tasks.next().await {
+        commit_logs.append(&mut logs);
     }
 
-    Ok(commit_logs)
+    commit_logs
 }
 
 pub type CommitLogs = Vec<CommitLog>;
@@ -86,9 +88,11 @@ struct Query {
     with_stats: bool,
 }
 
-async fn query(id: ProjectId, page: u16) -> Result<Response> {
-    let url = Url::parse(&*CONFIG.gitlab.addr)?
-        .join(&*format!("api/v4/projects/{}/repository/commits/", id.0))?;
+async fn query(id: ProjectId, page: u16) -> Response {
+    let url = Url::parse(&*CONFIG.gitlab.addr)
+        .expect("gitlab 地址解析失败")
+        .join(&*format!("api/v4/projects/{}/repository/commits/", id.0))
+        .expect("url join 失败");
 
     let query = Query {
         page,
@@ -105,28 +109,25 @@ async fn query(id: ProjectId, page: u16) -> Result<Response> {
 
     let mut req = Request::new(method, url);
     req.insert_header("PRIVATE-TOKEN", &*CONFIG.gitlab.token);
-    req.set_query(&query).map_err(|e| {
-        error!("设置查询条件失败: {}", e);
-        anyhow::anyhow!("设置查询条件失败")
-    })?;
+    req.set_query(&query).expect("设置查询条件失败");
 
     let addr = req
         .url()
-        .socket_addrs(|| match req.url().scheme() {
-            "http" => Some(80),
-            "https" => Some(443),
-            _ => None,
-        })?
+        .socket_addrs(|| None)
+        .expect("Resolve a URL’s host and port number to SocketAddr failed")
         .into_iter()
         .next()
-        .ok_or_else(|| anyhow::anyhow!("Invalid gitlab address: {}", CONFIG.gitlab.addr))?;
+        .expect("Resolve a URL’s host and port number to SocketAddr failed");
 
-    let stream = TcpStream::connect(addr).await?;
+    let stream = TcpStream::connect(addr).await.expect("TCP连接失败");
     req.set_peer_addr(stream.peer_addr().ok());
     req.set_local_addr(stream.local_addr().ok());
 
     if page.ne(&0) {
         info!("开始查询{}第{}页", id, page);
     }
-    Ok(async_h1::connect(stream.clone(), req).await.unwrap())
+
+    async_h1::connect(stream.clone(), req)
+        .await
+        .expect("调用gitlab api失败")
 }

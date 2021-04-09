@@ -3,7 +3,6 @@ use std::fmt::{Display, Formatter};
 use std::fs;
 use std::path::Path;
 
-use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::CONFIG;
@@ -11,6 +10,7 @@ use crate::CONFIG;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Config {
     pub threads: usize,
+    pub concurrent: usize,
     pub sqlite: String,
     pub gitlab: Gitlab,
     pub account: HashMap<String, String>,
@@ -42,16 +42,16 @@ impl Display for Author {
         write!(f, "{}", CONFIG.account.get(&self.0).unwrap_or(&self.0))
     }
 }
-pub fn init() -> Result<Config> {
+pub fn init() -> Config {
     let cfg_name = "config.toml";
-    init_config(cfg_name)?;
-    let res = fs::read_to_string(cfg_name)?;
-    Ok(toml::from_str::<Config>(&*res)?)
+    init_config(cfg_name);
+    let res = fs::read_to_string(cfg_name).expect("读取配置文件失败");
+    toml::from_str::<Config>(&*res).expect("解析toml配置失败")
 }
 
-fn init_config(cfg_name: &str) -> Result<()> {
+fn init_config(cfg_name: &str) {
     if Path::new(cfg_name).exists() {
-        return Ok(());
+        return;
     }
 
     let mut account = HashMap::new();
@@ -61,6 +61,7 @@ fn init_config(cfg_name: &str) -> Result<()> {
 
     let cfg = Config {
         threads: num_cpus::get(),
+        concurrent: 32,
         sqlite: "gitlab.db".to_string(),
         gitlab: Gitlab {
             addr: "http://devgit.z-bank.com/".to_string(),
@@ -70,5 +71,9 @@ fn init_config(cfg_name: &str) -> Result<()> {
         project,
     };
 
-    Ok(fs::write(cfg_name, toml::to_string_pretty(&cfg)?)?)
+    fs::write(
+        cfg_name,
+        toml::to_string_pretty(&cfg).expect("初始化toml格式失败"),
+    )
+    .expect("初始化toml配置文件失败")
 }

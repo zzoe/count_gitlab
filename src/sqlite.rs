@@ -1,11 +1,10 @@
-use anyhow::Result;
 use log::info;
 use rusqlite::{Connection, Statement};
 
 use crate::config::ProjectId;
 use crate::gitlab::CommitLogs;
 
-pub fn init(conn: &Connection) -> Result<Statement> {
+pub fn init(conn: &Connection) -> Statement {
     conn.execute(
         "create table if not exists commit_log (
              project_id integer not null,
@@ -26,16 +25,20 @@ pub fn init(conn: &Connection) -> Result<Statement> {
              constraint commit_log_pk primary key (project_id, full_commit_id)
          )",
         [],
-    )?;
-    conn.execute("delete from commit_log ", [])?;
+    )
+    .expect("建表失败");
+    conn.execute("delete from commit_log ", [])
+        .expect("清空数据失败");
 
-    let stmt = conn.prepare("insert into commit_log values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")?;
-    Ok(stmt)
+    let stmt = conn
+        .prepare("insert into commit_log values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+        .expect("prepare insert statement 失败");
+    stmt
 }
 
-pub fn insert(stmt: &mut Statement, logs: CommitLogs) -> Result<()> {
+pub fn insert(stmt: &mut Statement, logs: CommitLogs) {
     if logs.is_empty() {
-        return Ok(());
+        return;
     }
 
     let log = logs.get(0).unwrap();
@@ -60,9 +63,9 @@ pub fn insert(stmt: &mut Statement, logs: CommitLogs) -> Result<()> {
             log.parent_ids.join(","),
             log.stats.additions.to_string(),
             log.stats.deletions.to_string(),
-        ])?;
+        ])
+        .expect("插入数据库失败");
     }
 
     info!("结束插入{},耗时{}ms", id, start.elapsed().as_millis());
-    Ok(())
 }

@@ -208,7 +208,7 @@ fn add_title(sheet_writer: &mut SheetWriter) {
     title.add_cell("姓名");
     title.add_cell("提交次数");
     title.add_cell("新增代码总行数");
-    title.add_cell("日均新增代码行数");
+    title.add_cell("自然日日均新增代码行数");
 
     sheet_writer.append_row(title).expect("excel添加表头失败")
 }

@@ -20,6 +20,13 @@ pub static CONFIG: Lazy<Config> = Lazy::new(config::init);
 pub static EXECUTOR: Lazy<Executor> = Lazy::new(Executor::new);
 
 fn main() {
+    init();
+    info!("统计开始");
+    future::block_on(EXECUTOR.run(work()));
+    info!("统计结束");
+}
+
+fn init() {
     log4rs::init_file("log4rs.yaml", Default::default()).unwrap();
 
     for i in 1..CONFIG.threads {
@@ -30,13 +37,9 @@ fn main() {
             })
             .expect("cannot spawn executor thread");
     }
-
-    info!("统计开始");
-    future::block_on(EXECUTOR.run(run()));
-    info!("统计结束");
 }
 
-async fn run() {
+async fn work() {
     let mut deal_tasks = Select(Vec::new());
     let (s, r) = bounded(CONFIG.concurrent);
 
